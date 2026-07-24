@@ -47,6 +47,42 @@ def login_user(request):
 # def registration(request):
 # ...
 
+@csrf_exempt
+def registration(request):
+    data = json.loads(request.body)
+
+    username = data['userName']
+    password = data['password']
+    first_name = data['firstName']
+    last_name = data['lastName']
+    email = data['email']
+
+    # Check if username already exists
+    if User.objects.filter(username=username).exists():
+        return JsonResponse({
+            "userName": username,
+            "error": "Already Registered"
+        })
+
+    # Create the new user
+    user = User.objects.create_user(
+        username=username,
+        password=password,
+        first_name=first_name,
+        last_name=last_name,
+        email=email
+    )
+
+    user.save()
+
+    # Log the user in automatically
+    login(request, user)
+
+    return JsonResponse({
+        "userName": username,
+        "status": "Authenticated"
+    })
+
 # # Update the `get_dealerships` view to render the index page with
 # a list of dealerships
 # def get_dealerships(request):
